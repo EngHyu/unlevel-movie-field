@@ -3,6 +3,7 @@ import json
 import urllib
 import requests
 from datetime import date, timedelta
+from decimal import Decimal
 
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify
@@ -130,20 +131,22 @@ def movie():
     FIND_MOVIE_URL = BOXOFFICE_URL.format('findDailyBoxOfficeList.do')
     soup = BeautifulSoup(requests.post(FIND_MOVIE_URL, data=form).text, 'html.parser')
     movies = list(map(
-        lambda anchor: {
+        lambda anchor, see: {
             'name': anchor.text,
-            'code': re.search(r'movie.+,\'(.+)\'', anchor.attrs['onclick']).group(1)
+            'code': re.search(r'movie.+,\'(.+)\'', anchor.attrs['onclick']).group(1),
+            'see': int(Decimal(re.sub(r'[^\d]', '', see.text))),
         },
         soup.select('.ellip > a'),
+        soup.select('td.tar:nth-child(8)'),
     ))
 
     FIND_POSTER_URL = MOVIE_URL.format('searchMovieDtl.do')
     for movie in movies:
         response = requests.post(FIND_POSTER_URL, data=movie).text
         soup = BeautifulSoup(response, 'html.parser')
-        img = soup.select('.fl.thumb')
+        img = soup.select('.fl.thumb>img')
         if len(img) == 0: continue
-        href = img[0].attrs['href']
+        href = img[0].attrs['src']
         movie['img'] = BASE_URL.format(href)
 
     data = {

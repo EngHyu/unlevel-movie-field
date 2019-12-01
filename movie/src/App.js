@@ -17,9 +17,9 @@ class App extends Component {
   render() {
     return (
       <div>
-        <CalendarWrapper setState={this.handler} />
-        <Location />
-        {/* <Movie /> */}
+        <Movie />
+        {/* <CalendarWrapper setState={this.handler} />
+        <Location /> */}
       </div>
     );
   }

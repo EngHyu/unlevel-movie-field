@@ -1,63 +1,60 @@
 import React, { Component } from 'react';
+import GridLayout from 'react-grid-layout';
 import axios from 'axios';
+import './Movie.css';
 
 const base = 'http://localhost:6006/api/'
-const area = base + 'area'
-const detail = base + 'detail/'
-const theater = base + 'theater/'
+const movie = base + 'movie'
 
 class Movie extends Component {
   state = {
-    list: ''
+    posters: '',
   }
 
   constructor() {
+    console.log('start movie constructor')
     super()
-    axios.get(area)
-    .then(res => res.data.map(
-        ele => <Wrapper array={
-          Array(ele['count'])
-          .fill(<Area name={ele['name']} />)}
-          id={ele['id']} />)
-    )
-    .then(list => this.setState({list: list}))
-    .catch(err => {
-      console.log(err);
-    })
-    .finally(() => {
-    });
+    const make_grid = (ele) => <Grid scale={ele['scale']} img={ele['img']}/>
+    const make_grids = (arr) => arr.map(ele => make_grid)
+
+    axios.get(movie)
+    .then(res => res.data.data)
+    .then(datas => make_grids(datas))
+    .then(res => {console.log(res); return res})
+    .then(grids => <Wrapper item={grids}/>)
+    .then(wrapper => this.setState({...this.state, posters: wrapper }))
+    .catch(err => console.log(err))
+    .finally(() => console.log('finish movie constructor'))
   }
 
   render() {
-    return this.state.list;
-  }
-}
-
-class Area extends Component {
-  render() {
-    return (
-      <a>{this.props.name}</a>
-    );
+    return <div>{this.state.posters}</div>;
   }
 }
 
 class Wrapper extends Component {
   render() {
     return (
-      <div onClick={() => this.get_detail(this.props.id)}>{this.props.array}</div>
+      <div id='123'>{this.props.item}</div>
     );
   }
+}
 
-  get_detail(id) {
-    axios.get(detail + id)
-    .then(res => {
-      console.log(res.data['basareaCdList'])
-      const a = res.data['basareaCdList'].map(data => {
-        axios.get(theater + data['cd'])
-        .then(res => console.log(res))
-      })
+class Grid extends Component {
+  make_style(img, scale) {
+    return {
+      backgroundImage: 'url(' + img + ')',
+      width:  scale + 'px',
+      height: scale + 'px',
+    }
+  }
 
-    })
+  render() {
+    return <div
+      className='grid-item'
+      style={this.make_style(this.props.img, this.props.scale)}>
+
+    </div>
   }
 }
 

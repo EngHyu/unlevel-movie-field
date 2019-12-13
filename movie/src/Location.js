@@ -9,7 +9,7 @@ const theater = base + 'theater/'
 class Location extends Component {
   state = {
     list: '',
-    detail: ''
+    detail: '',
   }
 
   constructor() {

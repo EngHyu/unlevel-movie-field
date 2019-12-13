@@ -1,0 +1,6 @@
+.grid-item {
+    margin: 0;
+    display: inline-block;
+    /* background-size: 115%; */
+    background-position: center;
+}

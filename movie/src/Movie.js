@@ -12,13 +12,19 @@ class Movie extends Component {
   }
 
   constructor() {
+    console.log('start movie constructor')
     super()
-    axios.get(movie)
-    .then(res => res.data)
-    .then(movies => movies.map(ele=><Grid propo={1} img={ele['img']}/>))
-    .then(res => {console.log(res); return res})
-    .then(grids => this.setState({...this.state, posters: grids }))
+    const make_grid = (ele) => <Grid scale={ele['scale']} img={ele['img']}/>
+    const make_grids = (arr) => arr.map(ele => make_grid)
 
+    axios.get(movie)
+    .then(res => res.data.data)
+    .then(datas => make_grids(datas))
+    .then(res => {console.log(res); return res})
+    .then(grids => <Wrapper item={grids}/>)
+    .then(wrapper => this.setState({...this.state, posters: wrapper }))
+    .catch(err => console.log(err))
+    .finally(() => console.log('finish movie constructor'))
   }
 
   render() {
@@ -26,14 +32,29 @@ class Movie extends Component {
   }
 }
 
-class Grid extends Component {
+class Wrapper extends Component {
   render() {
-    return (<div class={'grid-item grid-item-' + this.props.propo}
-      style={{
-        backgroundImage: 'url('+this.props.img+')',
-        backgroundSize: 'cover',
-      }}>
-      </div>)
+    return (
+      <div id='123'>{this.props.item}</div>
+    );
+  }
+}
+
+class Grid extends Component {
+  make_style(img, scale) {
+    return {
+      backgroundImage: 'url(' + img + ')',
+      width:  scale + 'px',
+      height: scale + 'px',
+    }
+  }
+
+  render() {
+    return <div
+      className='grid-item'
+      style={this.make_style(this.props.img, this.props.scale)}>
+
+    </div>
   }
 }
 

@@ -1,6 +1,22 @@
+#wrapper {
+    width: 100vw;
+    height: 300vw;
+    display: grid;
+}
+
 .grid-item {
     margin: 0;
-    display: inline-block;
-    /* background-size: 115%; */
     background-position: center;
+}
+
+@media (min-width: 600px) {
+    .grid-item {
+        background-size: initial;
+    }
+}
+
+@media (max-width: 599px) {
+    .grid-item {
+        background-size: cover;
+    }
 }

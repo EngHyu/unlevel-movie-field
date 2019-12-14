@@ -18,8 +18,8 @@ class App extends Component {
     return (
       <div>
         <Movie />
-        {/* <CalendarWrapper setState={this.handler} />
-        <Location /> */}
+        <CalendarWrapper setState={this.handler} />
+        <Location />
       </div>
     );
   }

@@ -86,20 +86,14 @@ class Wrapper extends Component {
   }
 
   componentDidMount() {
-    const first = document.querySelector('.grid-item').offsetWidth
+    const ratio = 140 // height per width
     const max_row = Math.max(...this.props.item.map(ele => ele.props.ele['row']['end']))
     document.querySelectorAll('.wrapper').forEach(
       ele => {
-        ele.style.height = 140 / 2 ** this.props.num * max_row + 'vw';
+        ele.style.height = ratio / 2 ** this.props.num * max_row + 'vw';
         ele.style.gridTemplateRows = 'repeat(' + max_row + ', 1fr)';
-        // this.make_style(
-        //   this.props.item[0].props.ele['col']['end'],
-        //   max_row,
-        //   this.props.num
-        // )
       }
     )
-    console.log(document.querySelector('.wrapper').style)
 
     document.querySelectorAll('.grid-item').forEach(
       ele => {
@@ -124,7 +118,10 @@ class Grid extends Component {
   render() {
     return <div
       className='grid-item'
-      style={this.make_style(this.props.ele)}>
+      style={this.make_style(this.props.ele)}
+      title={this.props.ele['name']}
+      alt={this.props.ele['name']}
+      >
     </div>
   }
 }

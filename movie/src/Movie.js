@@ -62,44 +62,61 @@ class Movie extends Component {
     .then(data => make_grids(data))
     .then(wrapper => this.setState({...this, posters: wrapper}))
     .catch(err => console.log(err))
-    .finally(() => console.log('finish movie constructor'))
+    .finally(() => null)
   }
 
   render() {
     return <div>{this.state.posters}</div>;
   }
-
-  componentDidUpdate() {
-    document.querySelectorAll('.grid-item').forEach(
-      ele => {
-        if (ele.offsetWidth < 600)
-          ele.style.backgroundSize = 'cover'
-      }
-    )
-  }
 }
 
 class Wrapper extends Component {
-  make_style(num) {
+  make_style(row, col) {
     return {
-      gridTemplateRows: 'repeat(' + 2 * 2 ** num + ', 1fr)',
-      gridTemplateColumns: 'repeat(' + 2 ** num + ', 1fr)',
+      gridTemplateRows: 'repeat(' + row + ', 1fr)',
+      gridTemplateColumns: 'repeat(' + 2 ** col + ', 1fr)',
     }
   }
 
   render() {
     return <div
-      id='wrapper'
-      style={this.make_style(this.props.num)}>{this.props.item}
+      className='wrapper'
+      style={this.make_style(null, this.props.num, this.props.num)}>{this.props.item}
     </div>
+  }
+
+  componentDidMount() {
+    const first = document.querySelector('.grid-item').offsetWidth
+    const max_row = Math.max(...this.props.item.map(ele => ele.props.ele['row']['end']))
+    document.querySelectorAll('.wrapper').forEach(
+      ele => {
+        ele.style.height = 140 / 2 ** this.props.num * max_row + 'vw';
+        ele.style.gridTemplateRows = 'repeat(' + max_row + ', 1fr)';
+        // this.make_style(
+        //   this.props.item[0].props.ele['col']['end'],
+        //   max_row,
+        //   this.props.num
+        // )
+      }
+    )
+    console.log(document.querySelector('.wrapper').style)
+
+    document.querySelectorAll('.grid-item').forEach(
+      ele => {
+        if (ele.offsetWidth > 600)
+          ele.style.backgroundSize = 'initial'
+      }
+    )
   }
 }
 
 class Grid extends Component {
   make_style(ele) {
     return {
-      gridRow: ele['row']['start'] + '/' + ele['row']['end'],
-      gridColumn: ele['col']['start'] + '/' + ele['col']['end'],
+      gridRowStart: ele['row']['start'],
+      gridRowEnd: ele['row']['end'],
+      gridColumnStart: ele['col']['start'],
+      gridColumnEnd: ele['col']['end'],
       backgroundImage: 'url(' + ele['img'] + ')',
     }
   }

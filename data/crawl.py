@@ -58,7 +58,7 @@ def movie():
     soup = BeautifulSoup(requests.post(URL.TOP_MOVIE, data=form).text, 'html.parser')
     
     parseInt = lambda text: int(re.sub(r'[^\d]', '', text))
-    normalize = lambda num: math.floor(math.log(num, 3)) if num != 0 else 0
+    normalize = lambda num: math.floor(math.log(num, 4)) if num != 0 else 0
 
     scales = [parseInt(see.text) for see in soup.select('td.tar:nth-child(8)')]
     min_scale = normalize(scales[-1])

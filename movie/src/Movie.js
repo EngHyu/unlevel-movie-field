@@ -9,7 +9,6 @@ class Movie extends Component {
   }
 
   constructor() {
-    console.log('start movie constructor')
     super()
 
     const make_grid = (ele, idx) => <Grid ele={ele} key={idx} />

@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-
-const base = 'http://localhost:6006/api/'
-const area = base + 'area'
-const detail = base + 'detail/'
-const theater = base + 'theater/'
+import URL from './Const.js';
+import './Location.css';
 
 class Location extends Component {
   state = {
@@ -14,29 +11,47 @@ class Location extends Component {
 
   constructor() {
     super()
-    const make_area = (ele) => Array(ele['count']).fill(<Area name={ele['name']}/>)
-    const make_wrapper = (ele) => <Wrapper array={make_area(ele)} onClick={() => this.get_detail(ele['id'])}/>
+    const make_area = (ele) => {
+      return [...Array(ele['count']).keys()]
+        .map(e => <Area
+          key={'area'+e}
+          name={ele['name']}
+        />)
+    }
+
+    const make_wrapper = (ele, idx) => {
+      return <Wrapper
+        key={'wrap'+idx}
+        array={make_area(ele)}
+        onClick={() => this.get_town(ele['id'])}
+      />
+    }
     
-    axios.get(area)
-    .then(res => res.data)
-    .then(data => data.map(ele => make_wrapper(ele)))
+    axios.get(URL.CITY)
+    .then(res => res.data.data)
+    .then(data => data.map((ele, idx) => make_wrapper(ele, idx)))
     .then(wrapper => this.setState({...this.state, list: wrapper }))
     .catch(err => console.log(err))
-    .finally(() => console.log('finish Location constructor', area))
+    .finally(() => null)
   }
 
   render() {
     return <div>{this.state.list}{this.state.detail}</div>;
   }
 
-  get_detail(id) {
-    console.log('start Location get_detail', id)
-    const make_url = (data) => theater + data['cd']
-    const make_arr = (arr, ele) => arr.concat(ele.data['theaCdList'])
-    const make_area = (ele) => <Area name={ele['cdNm']} onClick={() => this.select(ele['cd'])}/>
+  get_town(city_id) {
+    const make_url = (data) => URL.THEATER + data['cd']
+    const make_arr = (arr, ele) => arr.concat(ele.data.data)
+    const make_area = (ele) => {
+      return <Area
+        key={ele['cd']}
+        name={ele['cdNm']}
+        onClick={() => this.select(ele['cd'])}
+      />
+    }
 
-    axios.get(detail + id)
-    .then(res => res.data['basareaCdList'])
+    axios.get(URL.TOWN + city_id)
+    .then(res => res.data.data)
     .then(arr => arr.map(data => make_url(data)))
     .then(arr => arr.map(url => axios.get(url)))
     .then(arr => axios.all(arr))
@@ -45,7 +60,7 @@ class Location extends Component {
     .then(areas => <Wrapper array={areas}/>)
     .then(wrappers => this.setState({...this.state, detail: wrappers }))
     .catch(err => console.log(err))
-    .finally(() => console.log('finish Location get_detail', id))
+    .finally(() => console.log('finish Location get_town', city_id))
   }
 
   select(id) {
@@ -55,7 +70,11 @@ class Location extends Component {
 
 class Area extends Component {
   render() {
-    return (<a onClick={this.props.onClick}>{this.props.name}</a>)
+    return <a
+      onClick={this.props.onClick}
+      dataText={this.props.name}
+      className='Area'
+    ></a>
   }
 }
 

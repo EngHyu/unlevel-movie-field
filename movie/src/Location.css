@@ -1,0 +1,3 @@
+.Area:before {
+    content: attr(dataText)
+}

@@ -5,82 +5,150 @@ import './Location.css';
 
 class Location extends Component {
   state = {
-    list: '',
-    detail: '',
+    location: undefined,
   }
 
   constructor() {
-    super()
-    const make_area = (ele) => {
-      return [...Array(ele['count']).keys()]
-        .map(e => <Area
-          key={'area'+e}
-          name={ele['name']}
-        />)
-    }
+    super();
+    this.getCity();
+  }
 
-    const make_wrapper = (ele, idx) => {
-      return <Wrapper
-        key={'wrap'+idx}
-        array={make_area(ele)}
-        onClick={() => this.get_town(ele['id'])}
-      />
-    }
-    
-    axios.get(URL.CITY)
-    .then(res => res.data.data)
-    .then(data => data.map((ele, idx) => make_wrapper(ele, idx)))
-    .then(wrapper => this.setState({...this.state, list: wrapper }))
-    .catch(err => console.log(err))
-    .finally(() => null)
+  async getCity() {
+    let data = await this.getCityAPI();
+    data = this.processData(data);
+
+    this.setState({
+      ...this.state,
+      location: data,
+    });
+  }
+
+  async getCityAPI() {
+    const res = await axios.get(URL.CITY);
+    const arr = res.data.data;
+    return arr;
+  }
+
+  processData(data) {
+    const wrapper = data.map((ele) => {
+      return this.makeWrapper(ele);
+    })
+    return wrapper;
+  }
+
+  makeWrapper({id, name, count}) {
+    return (<Wrapper
+      id={id}
+      key={id}
+      city={this.makeArea(name, count)}
+    />);
+  }
+
+  makeArea(name, count) {
+    return [...Array(count).keys()]
+    .map(e => {
+      return (<Area name={name} key={'city' + e} />);
+    });
   }
 
   render() {
-    return <div>{this.state.list}{this.state.detail}</div>;
-  }
-
-  get_town(city_id) {
-    const make_url = (data) => URL.THEATER + data['cd']
-    const make_arr = (arr, ele) => arr.concat(ele.data.data)
-    const make_area = (ele) => {
-      return <Area
-        key={ele['cd']}
-        name={ele['cdNm']}
-        onClick={() => this.select(ele['cd'])}
-      />
-    }
-
-    axios.get(URL.TOWN + city_id)
-    .then(res => res.data.data)
-    .then(arr => arr.map(data => make_url(data)))
-    .then(arr => arr.map(url => axios.get(url)))
-    .then(arr => axios.all(arr))
-    .then(res => res.reduce((arr, ele) => make_arr(arr, ele), []))
-    .then(arr => arr.map(ele => make_area(ele)))
-    .then(areas => <Wrapper array={areas}/>)
-    .then(wrappers => this.setState({...this.state, detail: wrappers }))
-    .catch(err => console.log(err))
-    .finally(() => console.log('finish Location get_town', city_id))
-  }
-
-  select(id) {
-    console.log(id)
+    const {location} = this.state;
+    return (<div>{location}</div>);
   }
 }
 
 class Area extends Component {
+  state = {
+    type: 'city',
+    id: undefined,
+    name: undefined,
+  }
+
+  componentWillMount() {
+    this.setState(this.props);
+  }
+
   render() {
+    const {name} = this.state;
     return <a
-      onClick={this.props.onClick}
-      dataText={this.props.name}
+      datatext={name}
       className='Area'
-    ></a>
+      onClick={() => {this.onClick()}}
+    ></a>;
+  }
+
+  onClick() {
+    const {type, id} = this.state;
+    if (type !== 'theater') return;
+    this.getSchedule(id);
+  }
+
+  getSchedule(id) {
+    console.log(this.state, id);
   }
 }
 
 class Wrapper extends Component {
+  state = {
+    id: undefined,
+    type: 'city',
+    city: undefined,
+    theater: undefined,
+  }
+
+  componentWillMount() {
+    this.setState(this.props);
+  }
+
   render() {
-    return (<div onClick={this.props.onClick}>{this.props.array}</div>)
+    const {city, theater} = this.state;
+    return (<div
+      onClick={() => this.onClick()}
+    >
+      {city}
+      {theater}
+    </div>);
+  }
+
+  onClick() {
+    const {type, id} = this.state;
+    if (type !== 'city') return;
+    this.getTown(id);
+  }
+
+  async getTown(city_id) {
+    let data = await this.getTownAPI(city_id);
+    data = this.processData(data);
+
+    this.setState({
+      ...this.state,
+      type: 'theater',
+      theater: data,
+    });
+  }
+
+  async getTownAPI(city_id) {
+    const res = await axios.get(URL.TOWN + city_id);
+    const arr = res.data.data;
+    const arr_1 = arr.map(({ cd }) => URL.THEATER + cd);
+    const arr_2 = arr_1.map(url => axios.get(url));
+    return await axios.all(arr_2);
+  }
+
+  processData(data) {
+    const arr = data.reduce((arr, {data}) => arr.concat(data.data), []);
+    const areas = arr.map(ele => this.makeArea(ele));
+    const wrapper = <Wrapper city={areas}/>;
+    return wrapper;
+  }
+
+  makeArea({cd, cdNm}) {
+    return (<Area
+      id={cd}
+      name={cdNm}
+      type='theater'
+      key={'theater'+cd}
+    />);
   }
 }
 

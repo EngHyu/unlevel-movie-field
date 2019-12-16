@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Calendar from 'react-calendar';
+import './Calendar.css';
 
 class CalendarWrapper extends Component {
   today = new Date()
@@ -17,6 +18,7 @@ class CalendarWrapper extends Component {
   render() {
     return (
       <div>
+        <h2>영화 관람일을 선택해주세요!</h2>
         <Calendar
           onChange={this.onChange}
           value={this.state.date}

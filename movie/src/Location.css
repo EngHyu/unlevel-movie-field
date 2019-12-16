@@ -1,3 +1,32 @@
+.Area-Container {
+    width: 8vw;
+    height: 7vw;
+
+    margin: 1rem;
+    padding: 1vw;
+    text-align: center;
+    vertical-align: middle;
+
+    display: inline-block !important;
+    outline: 1px solid black !important;
+}
+
+.Area-Container:hover {
+    box-shadow: 0 0 2em 1rem lightgreen;
+    background-size: 120%;
+    z-index: 0;
+}
+
+.selected, .selected:hover {
+    box-shadow: 0 0 1em 1rem rgb(0, 255, 13) !important;
+    z-index: 1;
+}
+
 .Area:before {
-    content: attr(datatext)
+    content: attr(databefore);
+    display: block;
+}
+
+.selected>.Area:after {
+    content: attr(dataafter);
 }

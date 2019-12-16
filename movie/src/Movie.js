@@ -5,16 +5,22 @@ import URL from './Const.js';
 
 class Movie extends Component {
   state = {
+    hide: true,
     posters: '',
   }
 
   constructor() {
-    super()
-
-    const make_grid = (ele, idx) => <Grid ele={ele} key={idx} />
-    const make_grids = (data) => <Wrapper num={data[0]['scale']} item={data.map((ele, idx) => make_grid(ele, idx))}/>
+    super();
+    const makeGrid = (ele, idx) => (<Grid ele={ele} key={idx} />);
+    const make_grids = (data) => {
+      return (<Wrapper
+        num={data[0]['scale']}
+        item={data.map((ele, idx) => makeGrid(ele, idx))}
+      />);
+    }
 
     axios.get(URL.MOVIE)
+    .then(res => {console.log(res); return res})
     .then(res => res.data.data)
     .then(data => {
       let max = { 'h': 0, 'w': 2 ** data[0]['scale'] }
@@ -66,7 +72,13 @@ class Movie extends Component {
   }
 
   render() {
-    return <div>{this.state.posters}</div>;
+    const {hide} = this.props;
+    const {posters} = this.state;
+    if (hide === true) return null;
+    else return (<div>
+      <h2>영화를 선택해주세요!</h2>
+      {posters}
+    </div>);
   }
 }
 
@@ -79,10 +91,21 @@ class Wrapper extends Component {
   }
 
   render() {
+    const {num, item} = this.props;
     return <div
       className='wrapper'
-      style={this.make_style(null, this.props.num, this.props.num)}>{this.props.item}
+      style={this.make_style(null, num, num)}
+      onClick={()=>this.onClick()}
+      >{item}
     </div>
+  }
+
+  onClick() {
+    document.querySelectorAll('.grid-item').forEach(
+      ele => {
+        ele.className = 'grid-item'
+      }
+    )
   }
 
   componentDidMount() {
@@ -97,7 +120,7 @@ class Wrapper extends Component {
 
     document.querySelectorAll('.grid-item').forEach(
       ele => {
-        if (ele.offsetWidth > 600)
+        if (ele.offsetWidth > 480)
           ele.style.backgroundSize = 'initial'
       }
     )
@@ -105,24 +128,46 @@ class Wrapper extends Component {
 }
 
 class Grid extends Component {
+  state = {
+    selected: false,
+  }
+
   make_style(ele) {
+    const green = ele.screen;
     return {
       gridRowStart: ele['row']['start'],
       gridRowEnd: ele['row']['end'],
       gridColumnStart: ele['col']['start'],
       gridColumnEnd: ele['col']['end'],
+      backgroundBlendMode: 'overlay',
       backgroundImage: 'url(' + ele['img'] + ')',
+      backgroundColor: green > 100 ? 'rgba(0, ' + green + ', 0, 0.75)' : '',
     }
   }
 
   render() {
+    const {selected} = this.state;
+    const {ele} = this.props;
     return <div
-      className='grid-item'
-      style={this.make_style(this.props.ele)}
-      title={this.props.ele['name']}
-      alt={this.props.ele['name']}
+      className={ selected === true ? 'grid-item selected' : 'grid-item' }
+      style={this.make_style(ele)}
+      title={ele['name']}
+      alt={ele['name']}
+      onClick={()=>this.onClick()}
       >
     </div>
+  }
+
+  componentWillMount() {
+    this.setState(this.props)
+  }
+
+  onClick() {
+    const {selected} = this.state;
+    this.setState({
+      ...this.state,
+      selected: !selected,
+    })
   }
 }
 

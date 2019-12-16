@@ -5,6 +5,7 @@ import './Location.css';
 
 class Location extends Component {
   state = {
+    hide: true,
     location: undefined,
   }
 
@@ -24,74 +25,70 @@ class Location extends Component {
   }
 
   async getCityAPI() {
-    const res = await axios.get(URL.CITY);
-    const arr = res.data.data;
-    return arr;
+    const theater = await (await axios.get(URL.THEATER)).data.theater;
+    // console.log(theater)
+    // let state = {}
+    // city.map((ele, idx) => {
+    //   const {id, name} = ele;
+
+    //   state[name] = Object.values(town)[idx].reduce((a, e) => {
+    //     const t_id = e.cd
+    //     const name = theater[id].map(e => e.cdNm)
+    //     return a.concat(name)
+    //   }, [])
+    // })
+
+    // return state
+
+    // let state = {}
+    // for (let [id, arr] of Object.entries(theater)) {
+    //   for (let ele of arr) {
+    //     state
+    //   }
+    // }
+    return theater
   }
 
   processData(data) {
-    const wrapper = data.map((ele) => {
-      return this.makeWrapper(ele);
-    })
+    console.log(data)
+    let wrapper = [];
+    for (let [key, values] of Object.entries(data)) {
+      wrapper.push(values.map(ele => this.makeArea(ele['name'], ele['cdNm'])))
+    }
     return wrapper;
   }
 
-  makeWrapper({id, name, count}) {
-    return (<Wrapper
-      id={id}
-      key={id}
-      city={this.makeArea(name, count)}
+  makeArea(city, theater) {
+    return (<Area
+      city={city}
+      theater={theater}
+      type='theater'
+      key={theater}
     />);
   }
 
-  makeArea(name, count) {
-    return [...Array(count).keys()]
-    .map(e => {
-      return (<Area name={name} key={'city' + e} />);
-    });
+  render() {
+    const {hide} = this.props;
+    const {location} = this.state;
+    if (hide === true) return ('');
+    else return (<div onClick={()=>this.onClick()}>
+      <h2>영화관을 선택해주세요!</h2>
+      {location}
+    </div>);
   }
 
-  render() {
-    const {location} = this.state;
-    return (<div>{location}</div>);
+  onClick() {
+    document.querySelectorAll('.Area-Container.selected').forEach(
+      ele => {
+        ele.className = 'Area-Container'
+      }
+    )
   }
 }
 
 class Area extends Component {
   state = {
-    type: 'city',
-    id: undefined,
-    name: undefined,
-  }
-
-  componentWillMount() {
-    this.setState(this.props);
-  }
-
-  render() {
-    const {name} = this.state;
-    return <a
-      datatext={name}
-      className='Area'
-      onClick={() => {this.onClick()}}
-    ></a>;
-  }
-
-  onClick() {
-    const {type, id} = this.state;
-    if (type !== 'theater') return;
-    this.getSchedule(id);
-  }
-
-  getSchedule(id) {
-    console.log(this.state, id);
-  }
-}
-
-class Wrapper extends Component {
-  state = {
-    id: undefined,
-    type: 'city',
+    hide: true,
     city: undefined,
     theater: undefined,
   }
@@ -101,54 +98,25 @@ class Wrapper extends Component {
   }
 
   render() {
-    const {city, theater} = this.state;
-    return (<div
-      onClick={() => this.onClick()}
-    >
-      {city}
-      {theater}
-    </div>);
+    const {hide, city, theater} = this.state;
+    
+    return <div
+    className={ hide === false ? 'Area-Container selected' : 'Area-Container' }
+    onClick={() => {this.onClick()}}
+    
+    ><a
+      databefore={city}
+      dataafter={'\n\n'+theater}
+      className='Area'
+    ></a></div>;
   }
 
   onClick() {
-    const {type, id} = this.state;
-    if (type !== 'city') return;
-    this.getTown(id);
-  }
-
-  async getTown(city_id) {
-    let data = await this.getTownAPI(city_id);
-    data = this.processData(data);
-
+    const {hide} = this.state
     this.setState({
       ...this.state,
-      type: 'theater',
-      theater: data,
-    });
-  }
-
-  async getTownAPI(city_id) {
-    const res = await axios.get(URL.TOWN + city_id);
-    const arr = res.data.data;
-    const arr_1 = arr.map(({ cd }) => URL.THEATER + cd);
-    const arr_2 = arr_1.map(url => axios.get(url));
-    return await axios.all(arr_2);
-  }
-
-  processData(data) {
-    const arr = data.reduce((arr, {data}) => arr.concat(data.data), []);
-    const areas = arr.map(ele => this.makeArea(ele));
-    const wrapper = <Wrapper city={areas}/>;
-    return wrapper;
-  }
-
-  makeArea({cd, cdNm}) {
-    return (<Area
-      id={cd}
-      name={cdNm}
-      type='theater'
-      key={'theater'+cd}
-    />);
+      hide: !hide,
+    })
   }
 }
 

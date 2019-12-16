@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import json
 import math
@@ -20,30 +21,40 @@ def city():
     cities = tuple(map(
         lambda soup, count: {
             'id': soup.attrs['wideareacd'],
+            'idNum': count,
             'name': soup.find('label').text,
-            'count': count,
         },
         soup.select('.schedule li'),
         counts,
     ))
 
+    cities = sorted(cities, key=lambda item: item['idNum'])
     return { 'data': cities }
 
 @cache
-def crawl(**kwargs):
-    url = kwargs['url']
+def town(*args):
+    # town
+    [city_id] = args
+    url = URL.GET_TOWN(city_id)
     response = json.loads(requests.get(url).text)
-    response['data'] = response.pop(list(response.keys())[0])
+    response[city_id] = response.pop(list(response.keys())[0])
     return response
 
-def town(city_id):
-    # town
-    url = URL.GET_TOWN(city_id)
-    return crawl(type='town', url=url, id=city_id)
-
-def theater(town_id):
+@cache
+def theater(*args):
+    city_id, city_name, town_id = args
     url = URL.GET_THEATER(town_id)
-    return crawl(type='theater', url=url, id=town_id)
+    response = json.loads(requests.get(url).text)
+    
+    try:
+        response[city_id] += [dict({'name': city_name}, **ele) for ele in response['theaCdList']]
+    except Exception as err:
+        print('no such key', err)
+        response[city_id] = [dict({'name': city_name}, **ele) for ele in response['theaCdList']]
+    finally:
+        del response['theaCdList']
+
+    return response
 
 @cache
 def movie():
@@ -64,15 +75,21 @@ def movie():
     min_scale = normalize(scales[-1])
     normalized_scales = [normalize(scale) - min_scale for scale in scales]
 
+    screens = [math.ceil(see/parseInt(screen.text)) for see, screen in zip(scales, soup.select('td.tar:nth-child(12)'))]
+    max_screen = max(screens)
+    normalized_screens = [math.ceil(screen / max_screen * 255) for screen in screens]
+
     movies = tuple(map(
-        lambda anchor, scale: {
+        lambda anchor, scale, screen: {
             'name': anchor.text,
             'code': re.search(r'movie.+,\'(.+)\'', anchor.attrs['onclick']).group(1),
-            'scale': scale,
+            'scale': normalized_scales[0] - scale,
+            'screen': screen,
         },
         soup.select('.ellip > a'),
         normalized_scales,
-    ))
+        normalized_screens,
+    ))[::-1]
 
     for movie in movies:
         response = requests.post(URL.POSTER, data=movie).text
@@ -86,3 +103,13 @@ def movie():
 
     return { 'data': movies }
 
+if __name__ == '__main__':
+    # city = [c for c in city()['data']]
+    # city_id = [c['id'] for c in city]
+    # city_name = [c['name'] for c in city]
+    # town_id = [[t['cd'] for t in town(id)[id]] for id in city_id]
+    # for c_id, c_name, t_ids in zip(city_id, city_name, town_id):
+    #     for t_id in t_ids:
+    #         theater(c_id, c_name, t_id)
+
+    movie()

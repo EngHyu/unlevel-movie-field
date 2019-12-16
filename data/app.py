@@ -1,3 +1,4 @@
+import cache
 import crawl
 
 from flask import Flask
@@ -6,8 +7,9 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 cors = CORS(app, resources={r'/api/*': {'origin': '*'}})
 
+@app.route('/api/city/')
 @cross_origin()
-@app.route('/api/city')
+@cache.run
 def city():
     '''
     communicate with Location.js
@@ -20,11 +22,12 @@ def city():
         { "count": num_of_theater },
     ]}
     '''
-    return crawl.city()
+    return
 
+@app.route('/api/town/')
 @cross_origin()
-@app.route('/api/town/<city_id>')
-def town(city_id):
+@cache.run
+def town():
     '''
     communicate with Location.js
     get town info in selected city_id
@@ -35,11 +38,12 @@ def town(city_id):
         { "cdNm": town_name },
     ]}
     '''
-    return crawl.town(city_id)
+    return
 
+@app.route('/api/theater/')
 @cross_origin()
-@app.route('/api/theater/<town_id>')
-def theater(town_id):
+@cache.run
+def theater():
     '''
     communicate with Location.js
     get theater info in selected town_id
@@ -50,11 +54,11 @@ def theater(town_id):
         { "cdNm": theater_name },
     ]}
     '''
-    return crawl.theater(town_id)
+    return
 
 # Movie.js
 ## get movie posters
-@app.route('/api/movie')
+@app.route('/api/movie/')
 @cross_origin()
 def movie():
     '''

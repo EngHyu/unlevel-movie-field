@@ -1,5 +1,4 @@
 .wrapper {
-    width: 100vw;
     display: grid;
 }
 
@@ -7,4 +6,20 @@
     margin: 0;
     background-size: cover;
     background-position: center;
+}
+
+.grid-item:hover {
+    box-shadow: 0 0 2em 1rem lightgreen;
+    background-size: 120%;
+    z-index: 0;
+}
+
+/* .grid-item:hover:before {
+    content: attr(alt);
+    font-size: 10rem;
+} */
+
+.selected, .selected:hover {
+    box-shadow: 0 0 1em 1rem rgb(0, 255, 13) !important;
+    z-index: 1;
 }

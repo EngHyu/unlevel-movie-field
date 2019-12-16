@@ -24,7 +24,7 @@ class App extends Component {
     const {movie, location} = this.state;
     return (
       <div className='App'>
-        <h1>역전 영화 예매 사이트</h1>
+        <h1>다양성 영화 예매 사이트</h1>
         <CalendarWrapper setState={this.handler} />
         <Next setState={this.stateHandler} id='movie' />
         <Movie hide={movie} />

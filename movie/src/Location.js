@@ -15,8 +15,8 @@ class Location extends Component {
   }
 
   async getCity() {
-    let data = await this.getCityAPI();
-    data = this.processData(data);
+    const {city, theater} = await this.getCityAPI();
+    const data = this.processData(city, theater);
 
     this.setState({
       ...this.state,
@@ -26,34 +26,22 @@ class Location extends Component {
 
   async getCityAPI() {
     const theater = await (await axios.get(URL.THEATER)).data.theater;
-    // console.log(theater)
-    // let state = {}
-    // city.map((ele, idx) => {
-    //   const {id, name} = ele;
-
-    //   state[name] = Object.values(town)[idx].reduce((a, e) => {
-    //     const t_id = e.cd
-    //     const name = theater[id].map(e => e.cdNm)
-    //     return a.concat(name)
-    //   }, [])
-    // })
-
-    // return state
-
-    // let state = {}
-    // for (let [id, arr] of Object.entries(theater)) {
-    //   for (let ele of arr) {
-    //     state
-    //   }
-    // }
-    return theater
+    const city = await (await axios.get(URL.CITY)).data.city;
+    return {'theater': theater, 'city': city}
   }
 
-  processData(data) {
-    console.log(data)
+  processData(city, theater) {
+    // console.log(data)
+    // let wrapper = [];
+    // for (let [key, values] of Object.entries(data)) {
+    //   wrapper.push(values.map(ele => this.makeArea(ele['name'], ele['cdNm'])))
+    // }
     let wrapper = [];
-    for (let [key, values] of Object.entries(data)) {
-      wrapper.push(values.map(ele => this.makeArea(ele['name'], ele['cdNm'])))
+    for (let c of city.data) {
+      wrapper.push(theater[c.id].map(ele => this.makeArea(ele['name'], ele['cdNm'])))
+      // console.log(key, values, theater)
+    //   wrapper.push(values.map(ele => this.makeArea(ele['name'], ele['cdNm'])))
+
     }
     return wrapper;
   }

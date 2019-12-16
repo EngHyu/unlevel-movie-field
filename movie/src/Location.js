@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import URL from './Const.js';
+
 import './Location.css';
+import './Animation.css';
 
 class Location extends Component {
   state = {
@@ -31,17 +33,9 @@ class Location extends Component {
   }
 
   processData(city, theater) {
-    // console.log(data)
-    // let wrapper = [];
-    // for (let [key, values] of Object.entries(data)) {
-    //   wrapper.push(values.map(ele => this.makeArea(ele['name'], ele['cdNm'])))
-    // }
     let wrapper = [];
     for (let c of city.data) {
       wrapper.push(theater[c.id].map(ele => this.makeArea(ele['name'], ele['cdNm'])))
-      // console.log(key, values, theater)
-    //   wrapper.push(values.map(ele => this.makeArea(ele['name'], ele['cdNm'])))
-
     }
     return wrapper;
   }
@@ -59,7 +53,7 @@ class Location extends Component {
     const {hide} = this.props;
     const {location} = this.state;
     if (hide === true) return ('');
-    else return (<div onClick={()=>this.onClick()}>
+    else return (<div className='ani' onClick={()=>this.onClick()}>
       <h2>영화관을 선택해주세요!</h2>
       {location}
     </div>);

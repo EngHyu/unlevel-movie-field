@@ -104,12 +104,12 @@ def movie():
     return { 'data': movies }
 
 if __name__ == '__main__':
-    # city = [c for c in city()['data']]
-    # city_id = [c['id'] for c in city]
-    # city_name = [c['name'] for c in city]
-    # town_id = [[t['cd'] for t in town(id)[id]] for id in city_id]
-    # for c_id, c_name, t_ids in zip(city_id, city_name, town_id):
-    #     for t_id in t_ids:
-    #         theater(c_id, c_name, t_id)
+    city = [c for c in city()['data']]
+    city_id = [c['id'] for c in city]
+    city_name = [c['name'] for c in city]
+    town_id = [[t['cd'] for t in town(id)[id]] for id in city_id]
+    for c_id, c_name, t_ids in zip(city_id, city_name, town_id):
+        for t_id in t_ids:
+            theater(c_id, c_name, t_id)
 
     movie()

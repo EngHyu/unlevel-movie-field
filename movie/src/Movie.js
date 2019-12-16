@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './Movie.css';
 import URL from './Const.js';
+
+import './Movie.css';
+import './Animation.css';
 
 class Movie extends Component {
   state = {
@@ -75,7 +77,7 @@ class Movie extends Component {
     const {hide} = this.props;
     const {posters} = this.state;
     if (hide === true) return null;
-    else return (<div>
+    else return (<div className='ani'>
       <h2>영화를 선택해주세요!</h2>
       {posters}
     </div>);
